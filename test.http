@@ -1,0 +1,21 @@
+### Delete photo with id "1" using GET
+DELETE http://localhost:8080/photos/delete/1
+
+###
+POST http://localhost:8080/photos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "fileName": "anotherPhoto.jpg"
+}
+
+###
+POST http://localhost:8080/photos
+Content-Type: application/json
+Accept: application/json
+
+{
+  "fileName": "helo.jpg"
+}
+

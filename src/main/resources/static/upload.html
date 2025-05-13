@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Upload</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 50px;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-container,
+        .photo-actions {
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="file"],
+        input[type="number"] {
+            margin-bottom: 15px;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #photoDisplay img {
+            margin-top: 15px;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="upload-container">
+        <h2>Photo Upload</h2>
+        <input id="fileupload" type="file" name="fileupload" />
+        <br>
+        <button id="upload-button" onclick="uploadFile()">Upload</button>
+    </div>
+
+    <div class="photo-actions">
+        <h2>Photo Actions</h2>
+        <label for="photoId">Enter Photo ID:</label>
+        <input type="number" id="photoId" placeholder="e.g., 1" />
+        <br>
+        <button onclick="viewPhoto()">View Photo</button>
+        <button onclick="deletePhoto()">Delete Photo</button>
+
+        <div id="photoDisplay"></div>
+    </div>
+</div>
+
+<script>
+    async function uploadFile() {
+        let formData = new FormData();
+        formData.append("data", fileupload.files[0]);
+        await fetch('http://localhost:8080/photos', {
+            method: "POST",
+            body: formData
+        }).then(result => result.json())
+            .then(photo => alert("Uploaded photo with ID: " + photo.id))
+            .catch(err => alert("Upload failed: " + err));
+    }
+
+    async function viewPhoto() {
+        const id = document.getElementById("photoId").value;
+        const imageUrl = `http://localhost:8080/photos/${id}/image`;
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = `Photo ID ${id}`;
+        img.style.maxWidth = "100%";
+
+        const display = document.getElementById("photoDisplay");
+        display.innerHTML = "";  // Clear previous content
+        display.appendChild(img);
+    }
+
+    async function deletePhoto() {
+        const id = document.getElementById("photoId").value;
+        if (!id) {
+            alert("Please enter a photo ID.");
+            return;
+        }
+
+        const confirmed = confirm("Are you sure you want to delete photo ID " + id + "?");
+        if (!confirmed) return;
+
+        await fetch(`http://localhost:8080/photos/delete/${id}`, {
+            method: "DELETE"
+        }).then(() => {
+            alert("Photo deleted (if it existed).");
+            document.getElementById("photoDisplay").innerHTML = "";
+        }).catch(err => alert("Delete failed: " + err));
+    }
+</script>
+
+</body>
+</html>
